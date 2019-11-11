@@ -5,7 +5,7 @@ import os
 import sys
 import struct
 import matplotlib.pyplot as pyplot
-path = './'
+path = './data'
 class SGC_SVM(BaseEstimator, ClassifierMixin):
     # C = 1/lambda , eta = learning_rate
     def __init__(self, C=1.0, eta=0.01, max_iter = 300, batch_size = 32):
@@ -62,8 +62,8 @@ class SGC_SVM(BaseEstimator, ClassifierMixin):
         return pred_result
 
 # load data
-tt_img = os.path.join(path, 'test-images-idx3-ubyte')
-tt_lbl = os.path.join(path, 'test-labels-idx1-ubyte')
+tt_img = os.path.join(path, 'new1k-images-idx3-ubyte')
+tt_lbl = os.path.join(path, 'new1k-labels-idx1-ubyte')
 tr_img = os.path.join(path, 'newtrain-images-idx3-ubyte')
 tr_lbl = os.path.join(path, 'newtrain-labels-idx1-ubyte')
 with open(tr_lbl, 'rb') as trlbl:
