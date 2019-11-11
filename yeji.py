@@ -64,8 +64,8 @@ class SGC_SVM(BaseEstimator, ClassifierMixin):
 # load data
 tt_img = os.path.join(path, 'test-images-idx3-ubyte')
 tt_lbl = os.path.join(path, 'test-labels-idx1-ubyte')
-tr_img = os.path.join(path, 'train-images-idx3-ubyte')
-tr_lbl = os.path.join(path, 'train-labels-idx1-ubyte')
+tr_img = os.path.join(path, 'newtrain-images-idx3-ubyte')
+tr_lbl = os.path.join(path, 'newtrain-labels-idx1-ubyte')
 with open(tr_lbl, 'rb') as trlbl:
   magic, num = struct.unpack(">II", trlbl.read(8))
   train_lbl = np.fromfile(trlbl, dtype=np.int8)
@@ -93,8 +93,8 @@ from sklearn.model_selection import GridSearchCV
 from sklearn import metrics
 
 param_grid = {
-    'C' : [0.001, 0.01, 0.1],
-    'eta' : [0.01, 0.1, 1.0]}
+    'C' : [0.01, 0.05, 0.1, 0.5, 1.0],
+    'eta' : [0.001, 0.01, 0.1]}
 clf = SGC_SVM()
 gs = GridSearchCV(clf, param_grid, cv=10)
 gs.fit(train_img, train_lbl)
@@ -106,7 +106,6 @@ sgd_svm = SGC_SVM(C = best_c, eta = best_eta)
 sgd_svm.fit(train_img, train_lbl)
 
 predicted = sgd_svm.predict(test_img)
-print(predicted)
 expected = test_lbl
 
 accuracy = metrics.accuracy_score(predicted, expected)
