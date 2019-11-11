@@ -62,8 +62,8 @@ class SGC_SVM(BaseEstimator, ClassifierMixin):
         return pred_result
 
 # load data
-tt_img = os.path.join(path, 't10k-images-idx3-ubyte')
-tt_lbl = os.path.join(path, 't10k-labels-idx1-ubyte')
+tt_img = os.path.join(path, 'test-images-idx3-ubyte')
+tt_lbl = os.path.join(path, 'test-labels-idx1-ubyte')
 tr_img = os.path.join(path, 'train-images-idx3-ubyte')
 tr_lbl = os.path.join(path, 'train-labels-idx1-ubyte')
 with open(tr_lbl, 'rb') as trlbl:
