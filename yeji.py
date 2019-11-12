@@ -10,8 +10,8 @@ class SGC_SVM(BaseEstimator, ClassifierMixin):
     # C = 1/lambda , eta = learning_rate
     def __init__(self, C=1.0, eta=0.01, max_iter = 300, batch_size = 32):
         self.C = C
-        self.w = np.random.normal(0.0, 0.1, np.shape(train_img)[1])
-        self.b = np.random.normal(0.0, 0.1, 1)
+        self.w = np.random.normal(0.0, 0.01, np.shape(train_img)[1])
+        self.b = np.random.normal(0.0, 0.01, 1)
         self.eta = eta
         self.max_iter = max_iter
         self.batch_size = batch_size
@@ -29,11 +29,13 @@ class SGC_SVM(BaseEstimator, ClassifierMixin):
             #     bs += 0 + 0
         grad_w = ws / self.batch_size + (1.0/self.C)*self.w
         grad_b = bs / self.batch_size
-        return grad_w, grad_b # self.w - self.eta * grad_w, self.b - self.eta * grad_b
+        return self.w - self.eta * grad_w, self.b - self.eta * grad_b
 
     def fit(self, X, y):
         self.w_classes = [self.w for _ in range(10)]
         self.b_classes = [self.b for _ in range(10)]
+        self.avg_w = self.w_classes
+        self.avg_b = self.b_classes
         random_idx = list(range(np.shape(X)[0]))
         random.shuffle(random_idx)
         for dig in range(10):
@@ -42,18 +44,19 @@ class SGC_SVM(BaseEstimator, ClassifierMixin):
             y_class = [1 if yi == dig else -1 for yi in y]
             for k in range(self.max_iter):
                 batch = random_idx[k*self.batch_size:(k+1)*self.batch_size]
-                grad_w, grad_b = self.grad(X, y_class, batch)
-                self.w = (k/(k+1))*self.w + (1.0/(k+1))*(self.w - self.eta * grad_w)
-                self.b = (k/(k+1))*self.b + (1.0/(k+1))*(self.b - self.eta * grad_b)
+                self.w, self.b = self.grad(X, y_class, batch)
                 self.w_classes[dig] = self.w
                 self.b_classes[dig] = self.b
+                # Weight Averaging
+                self.avg_w[dig] = (k/(k+1))*self.avg_w[dig] + (1.0/(k+1))*self.w
+                self.avg_b[dig] = (k/(k+1))*self.avg_b[dig] + (1.0/(k+1))*self.b
         return self
 
     def predict(self, X):
         pred = []
-        for w, b in zip(self.w_classes, self.b_classes):
+        for w, b in zip(self.avg_w, self.avg_b):
             pred.append(np.dot(X,w) + b)
-        print(pred[0])
+        # print(pred[0])
         pred_class = np.argmax(pred, axis = 0)
         pred_result = []
         f = open('result.txt', mode='w')
@@ -103,7 +106,8 @@ gs.fit(train_img, train_lbl)
 best_c = gs.best_params_['C']
 best_eta = gs.best_params_['eta']
 print("Best C value : ",best_c,"\nBest eta value : " ,best_eta)
-
+# best_c = 0.5
+# best_eta = 0.001
 sgd_svm = SGC_SVM(C = best_c, eta = best_eta)
 sgd_svm.fit(train_img, train_lbl)
 
