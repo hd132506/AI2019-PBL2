@@ -10,8 +10,8 @@ class SGC_SVM(BaseEstimator, ClassifierMixin):
     # C = 1/lambda , eta = learning_rate
     def __init__(self, C=1.0, eta=0.01, max_iter = 300, batch_size = 32):
         self.C = C
-        self.w = np.random.normal(0.0, 1.0, np.shape(train_img)[1])
-        self.b = np.random.normal(0.0, 1.0, 1)
+        self.w = np.random.normal(0.0, 0.1, np.shape(train_img)[1])
+        self.b = np.random.normal(0.0, 0.1, 1)
         self.eta = eta
         self.max_iter = max_iter
         self.batch_size = batch_size
@@ -22,14 +22,14 @@ class SGC_SVM(BaseEstimator, ClassifierMixin):
         bs = 0.0
         for i in idx :
             if y[i]*(np.dot(self.w, X[i]) + self.b) < 1:
-                ws += -1*y[i]*np.array(X[i], dtype=np.float64) + (1/self.C)*self.w
-                bs += -1*y[i] + 0
-            else :
-                ws += 0 + (1/self.C)*self.w
-                bs += 0 + 0
-        grad_w = ws / self.batch_size
+                ws += -1.0*y[i]*np.array(X[i], dtype=np.float64)
+                bs += -1.0*y[i] # + 0
+            # else :
+            #     ws += 0
+            #     bs += 0 + 0
+        grad_w = ws / self.batch_size + (1.0/self.C)*self.w
         grad_b = bs / self.batch_size
-        return self.w - self.eta * grad_w, self.b - self.eta * grad_b
+        return grad_w, grad_b # self.w - self.eta * grad_w, self.b - self.eta * grad_b
 
     def fit(self, X, y):
         self.w_classes = [self.w for _ in range(10)]
@@ -42,7 +42,9 @@ class SGC_SVM(BaseEstimator, ClassifierMixin):
             y_class = [1 if yi == dig else -1 for yi in y]
             for k in range(self.max_iter):
                 batch = random_idx[k*self.batch_size:(k+1)*self.batch_size]
-                self.w, self.b = self.grad(X, y_class, batch)
+                grad_w, grad_b = self.grad(X, y_class, batch)
+                self.w = (k/(k+1))*self.w + (1.0/(k+1))*(self.w - self.eta * grad_w)
+                self.b = (k/(k+1))*self.b + (1.0/(k+1))*(self.b - self.eta * grad_b)
                 self.w_classes[dig] = self.w
                 self.b_classes[dig] = self.b
         return self
