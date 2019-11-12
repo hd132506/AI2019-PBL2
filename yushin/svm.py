@@ -17,8 +17,10 @@ class mySVM:
 
         data_size = len(y)
 
-        batch_idx = [i for i in range(data_size)]
-        random.shuffle(batch_idx)
+        shuffled_indices = np.arange(data_size)
+        np.random.shuffle(shuffled_indices)
+        x = x[shuffled_indices]
+        y = y[shuffled_indices]
 
 
         # To be parameterized
@@ -27,9 +29,9 @@ class mySVM:
 
         
         for i in range(0, batch_size * max_iter, batch_size):
-            start_idx = i % len()
-            batch_x = x[i:i+batch_size]
-            batch_y = y[i:i+batch_size]
+            start_idx = i % data_size
+            batch_x = x[start_idx:start_idx+batch_size]
+            batch_y = y[start_idx:start_idx+batch_size]
 
             # TODO
             if batch_y * self.hypothesis(batch_x) <= 1:
@@ -37,10 +39,6 @@ class mySVM:
             else:
                 diff_w = 0
             diff_w += self.c * self.w_
-
-
-
-
 
     def predict(self, x):
         return np.where(self.hypothesis(x) >= 0.0, 1, -1)
