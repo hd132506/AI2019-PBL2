@@ -26,7 +26,7 @@ class BinarySVM:
 
 
         # To be parameterized
-        batch_size = 64
+        batch_size = 128
 
         n_epochs = batch_size * self.max_iter // self.data_size
         n_batches = self.data_size // batch_size
@@ -45,7 +45,7 @@ class BinarySVM:
                         dw[0] += -batch_y[i]
                 dw[1:] = dw[1:] / batch_size + self.c * self.w_[1:]
                 dw[0] /= batch_size
-                self.w_ += self.eta * dw
+                self.w_ -= self.eta * dw
                 # print('epoch', _epoch, self.cost(batch_x, batch_y, batch_size))
 
     def predict(self, x):
