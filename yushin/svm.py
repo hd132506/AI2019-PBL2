@@ -31,22 +31,36 @@ class BinarySVM:
         n_epochs = batch_size * self.max_iter // self.data_size
         n_batches = self.data_size // batch_size
 
-        for _epoch in range(n_epochs):
+        for epoch in range(n_epochs):
             random_indices = BinarySVM.shuffle(self.data_size)
+
+            # RMS init
+            rms = 0
+
             for batch in range(n_batches):
+                # Pick mini-batch
                 batch_indices = random_indices[batch*batch_size:batch*batch_size + batch_size]
                 batch_x = x[batch_indices]
                 batch_y = y[batch_indices]
-                dw = np.zeros(self.w_.shape)
 
+                # Calculate dw
+                dw = np.zeros(self.w_.shape)
                 for i, _ in enumerate(batch_y):
                     if batch_y[i] * self.hypothesis(batch_x[i]) < 1:
                         dw[1:] += -batch_y[i] * batch_x[i]
                         dw[0] += -batch_y[i]
-                dw[1:] = dw[1:] / batch_size + self.c * self.w_[1:]
+                dw[1:] = dw[1:] / batch_size + (1. / self.c) * self.w_[1:]
                 dw[0] /= batch_size
-                self.w_ -= self.eta * dw
-                # print('epoch', _epoch, self.cost(batch_x, batch_y, batch_size))
+
+                # Update
+                # Naive SGD : self.w_ -= self.eta * dw 
+                # RMS update
+                f = 0.01
+                rms = f * rms + (1 - f) * (dw**2)
+                self.w_ -= self.eta * dw / np.sqrt(rms)
+
+            if epoch % 10 == 0:
+                print('epoch', epoch, self.cost(x, y, self.data_size))
 
     def predict(self, x):
         print(self.hypothesis(x))
@@ -54,8 +68,7 @@ class BinarySVM:
 
 
     def cost(self, x, y, data_size):
-        max_ = np.vectorize(lambda m, n: max(m, n))
-        return (self.w_**2).sum()/2.0 + self.c * max_((1 - y * self.hypothesis(x)), 0).sum() / data_size
+        return (self.c*(self.w_**2)).sum()/2.0 + np.maximum((1 - y * self.hypothesis(x)), 0).sum() / data_size
 
     def hypothesis(self, x):
         return np.dot(x, self.w_[1:]) + self.w_[0]
