@@ -140,7 +140,7 @@ Loosely inspired by http://abel.ee.ucla.edu/cvxopt/_downloads/mnist.py
 which is GPL licensed.
 """
 
-def read(path="./", img, lbl=''):
+def read(train_img, train_lbl='', path="./"):
     """
     Python function for importing the MNIST data set.  It returns an iterator
     of 2-tuples with the first element being the label and the second element
@@ -151,7 +151,7 @@ def read(path="./", img, lbl=''):
         _magic, _num, rows, cols = struct.unpack(">IIII", fimg.read(16))
         img = np.fromfile(fimg, dtype=np.uint8).reshape(_num, rows, cols)
 
-    if lbl != '':
+    if train_lbl != '':
         fname_lbl = os.path.join(path, train_lbl)
         with open(fname_lbl, 'rb') as flbl:
             _magic, _num = struct.unpack(">II", flbl.read(8))
@@ -183,7 +183,7 @@ def read(path="./", img, lbl=''):
     get_img = lambda idx: (lbl[idx], img[idx])
 
     # Create an iterator which returns each image in turn
-    for i in range(data_size):
+    for i in range(_num):
         yield get_img(i)
 
 # import reader
@@ -201,7 +201,7 @@ def load(image, label=''):
         np.array([data[1].reshape(-1) for data in dset], dtype='f')
     flatten_labels = lambda dset : np.array([data[0] for data in dset])
 
-    dset = list(read(img=image, lbl=label))
+    dset = list(read(train_img=image, train_lbl=label))
 
 
     return (flatten_imgs(dset), flatten_labels(dset))
@@ -244,7 +244,7 @@ from sklearn.model_selection import GridSearchCV
 
 # All data
 # size = 80000
-
+print(sys.argv[1], sys.argv[2], sys.argv[3])
 X = load(image=sys.argv[1], label=sys.argv[2])
 Y = load(image=sys.argv[3])
 
