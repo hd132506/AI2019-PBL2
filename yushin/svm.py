@@ -5,12 +5,15 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 
 
 class BinarySVM:
-    def __init__(self, c=1.15, eta=0.01, forget_factor=0.1, max_iter=2000, random_state=1, label=-1):
+    def __init__(self, c=1.15, eta=0.01, forget_factor=0.1, mu = 0.975, v = 0.999,
+        max_iter=2000, random_state=1, label=-1):
         self.eta = eta
         self.max_iter = max_iter
         self.random_state = random_state
         self.c = c
         self.forget_factor = forget_factor
+        self.mu = mu
+        self.v = v
         # The label it classifies (+/-)
         self.label = label
     
@@ -27,7 +30,7 @@ class BinarySVM:
         self.data_size = len(y)
 
         # For stabilizing division by zero
-        epsilon = 10**(-6)
+        epsilon = 10**(-8)
 
         # To be parameterized
         batch_size = 128
@@ -35,11 +38,20 @@ class BinarySVM:
         n_epochs = batch_size * self.max_iter // self.data_size
         n_batches = self.data_size // batch_size
 
+
+        # RMS init
+        # rms = epsilon
+
+        # NADAM init
+        m = 0
+        n = 0
+        self.mu = 0.99
+        self.v = 0.999
+        mu_pw = self.mu
+        v_pw = self.v
+
         for epoch in range(n_epochs):
             random_indices = BinarySVM.shuffle(self.data_size)
-
-            # RMS init
-            rms = 0
 
             for batch in range(n_batches):
                 # Pick mini-batch
@@ -53,14 +65,29 @@ class BinarySVM:
                     if batch_y[i] * self.hypothesis(batch_x[i]) < 1:
                         dw[1:] -= batch_y[i] * batch_x[i]
                         dw[0] -= batch_y[i]
-                dw[1:] = dw[1:] / batch_size + (1. / self.c) * self.w_[1:]
-                dw[0] /= batch_size
+                dw /= batch_size 
+                dw[1:] += (1. / self.c) * self.w_[1:]
+      
 
-                # Update
-                # Naive SGD : self.w_ -= self.eta * dw 
-                # RMS update
-                rms = self.forget_factor * rms + (1 - self.forget_factor) * (dw**2)
-                self.w_ -= self.eta * dw / np.sqrt(epsilon + rms)
+                ###  Update
+                # 1. Naive SGD
+                # self.w_ -= self.eta * dw 
+
+                # 2. RMSProp
+                # rms = self.forget_factor * rms + (1 - self.forget_factor) * (dw**2)
+                # self.w_ -= self.eta * dw / np.sqrt(epsilon + rms)
+
+                # 3. NADAM
+                m = self.mu*m + (1-self.mu)*dw
+                n = self.v*n + (1-self.v)*np.power(dw, 2)
+                m_hat = (self.mu*m/(1 - mu_pw*self.mu)) + ((1-self.mu)*dw/(1-mu_pw))
+                n_hat = self.v*n / (1-v_pw)
+                self.w_ -= self.eta * m_hat / np.sqrt(epsilon + n_hat)
+
+                mu_pw *= self.mu
+                v_pw *= self.v
+                
+                
 
             # print('epoch', epoch, self.cost(x, y, self.data_size))
         return self
@@ -78,15 +105,19 @@ class BinarySVM:
 
 
 class mySVM(BaseEstimator, ClassifierMixin):
-    def __init__(self, c=1.15, eta=0.01, forget_factor=0.1, max_iter=1000, random_state=1):
+    def __init__(self, c=1.15, eta=0.01, forget_factor=0.1, mu = 0.975, v = 0.999,
+    max_iter=3000, random_state=1):
         self.c = c
         self.eta = eta
         self.forget_factor = forget_factor
+        self.mu = mu
+        self.v = v
         self.max_iter = max_iter
         self.random_state = random_state
     
     def fit(self, x, y):
         self.bin_classifiers = [BinarySVM(c= self.c, eta=self.eta, forget_factor=self.forget_factor,
+        mu = self.mu, v = self.v,
         max_iter=self.max_iter, random_state=self.random_state, label=label) \
             for label in np.unique(y)]
 

@@ -16,12 +16,12 @@ def read(dataset="training", data_size=10000, path="./dataset"):
 
     if dataset is "testing":
         data_size = min(data_size, 10000)
-        fname_img = os.path.join(path, 't10k-images.idx3-ubyte')
-        fname_lbl = os.path.join(path, 't10k-labels.idx1-ubyte')
+        fname_img = os.path.join(path, 'mnist_new_test-patterns-idx3-ubyte')
+        fname_lbl = os.path.join(path, 'mnist_new_test-labels-idx1-ubyte')
     elif dataset is "training":
         data_size = min(data_size, 60000)
-        fname_img = os.path.join(path, 'train-images.idx3-ubyte')
-        fname_lbl = os.path.join(path, 'train-labels.idx1-ubyte')
+        fname_img = os.path.join(path, 'mnist_new-patterns-idx3-ubyte')
+        fname_lbl = os.path.join(path, 'mnist_new-labels-idx1-ubyte')
     elif dataset is "new":
         data_size = min(data_size, 10000)
         fname_img = os.path.join(path, 'mnist-new1k-images-idx3-ubyte')

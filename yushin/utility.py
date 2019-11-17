@@ -1,6 +1,6 @@
 from sklearn import metrics
 import numpy as np
-from sklearn.preprocessing import StandardScaler, RobustScaler
+from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
 
 def evaluation(prediction, goal):
     print("Classification report\n%s\n"
@@ -11,6 +11,9 @@ def evaluation(prediction, goal):
 def scale(dataset):
     # ztransform = lambda arr : (arr - np.mean(arr))/np.std(arr)
     scaler = StandardScaler()
+    # scaler = RobustScaler()
+    # scaler = MinMaxScaler()
+
     scaler.fit(dataset)
     return scaler.transform(dataset)
 
