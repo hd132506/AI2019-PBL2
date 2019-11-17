@@ -45,8 +45,6 @@ class BinarySVM:
         # NADAM init
         m = 0
         n = 0
-        self.mu = 0.99
-        self.v = 0.999
         mu_pw = self.mu
         v_pw = self.v
 
@@ -77,7 +75,7 @@ class BinarySVM:
                 # rms = self.forget_factor * rms + (1 - self.forget_factor) * (dw**2)
                 # self.w_ -= self.eta * dw / np.sqrt(epsilon + rms)
 
-                # 3. NADAM
+                # # 3. NADAM
                 m = self.mu*m + (1-self.mu)*dw
                 n = self.v*n + (1-self.v)*np.power(dw, 2)
                 m_hat = (self.mu*m/(1 - mu_pw*self.mu)) + ((1-self.mu)*dw/(1-mu_pw))

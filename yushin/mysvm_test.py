@@ -15,7 +15,7 @@ X, Y = load('all', data_size=size)
 shuffled_indices = np.arange(size)
 np.random.shuffle(shuffled_indices)
 
-split = 60000
+split = 70000
 
 X = X[shuffled_indices]
 X, tx = X[:split], X[split:]
@@ -24,8 +24,8 @@ Y = Y[shuffled_indices]
 Y, ty = Y[:split], Y[split:]
 
 
-# # # Training / Testing
-# size = 30000
+# # Training / Testing
+# size = 60000
 
 # X, Y = load('training', data_size=size)
 # tx, ty = load('testing', data_size=10000)
@@ -44,7 +44,7 @@ tx = scale(tx)
 
 
 
-model = mySVM(c=500, eta=0.007, mu=0.975, v=0.975, max_iter=20000)
+model = mySVM(c=1000, eta=0.005, mu=0.999, v=0.99, max_iter=7000)
 model.fit(X, Y)
 
 predicted = model.predict(tx)
