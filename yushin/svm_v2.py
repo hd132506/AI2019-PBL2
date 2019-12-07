@@ -30,13 +30,11 @@ class mySVM(BaseEstimator, ClassifierMixin):
         d[np.arange(data_size),y] = 0
 
         # dw = (1/x.shape[0]) * np.dot(x.T, d)
-        dw = (1/x.shape[0]) * np.dot(x.T, d)
-        dw += (1. / self.c) * self.w_
+        dw = (1/x.shape[0]) * np.dot(x.T, d) + (1. / self.c) * self.w_
 
         return dw
 
     def fit(self, x, y):
-        # x = np.append(np.ones((x.shape[0], 1)), x, axis=1)
         rgen = np.random.RandomState(self.random_state)
 
         # Magic number means 10 classes(MNIST)
@@ -55,13 +53,12 @@ class mySVM(BaseEstimator, ClassifierMixin):
         n_batches = self.data_size // batch_size
 
         # NADAM init
-        m = np.zeros(self.label_number)
-        n = np.zeros(self.label_number)
+        m = np.zeros_like(self.w_)
+        n = np.zeros_like(self.w_)
         mu_pw = self.mu
         v_pw = self.v
 
         for epoch in range(n_epochs):
-            print('epoch', epoch, '/', n_epochs)
             random_indices = mySVM.shuffle(self.data_size)
 
             for batch in range(n_batches):
@@ -72,22 +69,22 @@ class mySVM(BaseEstimator, ClassifierMixin):
 
                 dw = self.get_dw(batch_x, batch_y, batch_size)
 
-                # # Naive SGD
-                # self.w_ -= self.eta*dw
+                # Naive SGD
+                self.w_ -= self.eta*dw
 
-                # NADAM
-                m = self.mu*m + (1-self.mu)*dw
-                n = self.v*n + (1-self.v)*np.power(dw, 2)
-                m_hat = (self.mu*m/(1 - mu_pw*self.mu)) + ((1-self.mu)*dw/(1-mu_pw))
-                n_hat = self.v*n / (1-v_pw)
-                self.w_ -= self.eta * m_hat / np.sqrt(epsilon + n_hat)
+                # # NADAM
+                # m = self.mu*m + (1-self.mu)*dw
+                # n = self.v*n + (1-self.v)*np.power(dw, 2)
+                # m_hat = (self.mu*m/(1 - mu_pw*self.mu)) + ((1-self.mu)*dw/(1-mu_pw))
+                # n_hat = self.v*n / (1-v_pw)
+                # self.w_ -= self.eta * m_hat / np.sqrt(epsilon + n_hat)
 
-                mu_pw *= self.mu
-                v_pw *= self.v
+                # mu_pw *= self.mu
+                # v_pw *= self.v
+
         return self
         
     def predict(self, x):
-        # x = np.append(np.ones((x.shape[0], 1)), x, axis=1)
         return np.argmax(np.dot(x, self.w_), axis=1)
 
     def score(self, x, y):
