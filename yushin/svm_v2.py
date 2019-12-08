@@ -24,12 +24,12 @@ class mySVM(BaseEstimator, ClassifierMixin):
     def get_dw(self, x, y, data_size):
         dw = np.zeros(self.w_.shape)
         scores = np.dot(x, self.w_)
+
         label_scores = scores[np.arange(data_size), y]
         d = scores - label_scores[:, np.newaxis] + 1
         d = np.where(d > 0, 1, d)
         d[np.arange(data_size),y] = 0
 
-        # dw = (1/x.shape[0]) * np.dot(x.T, d)
         dw = (1/x.shape[0]) * np.dot(x.T, d) + (1. / self.c) * self.w_
 
         return dw
