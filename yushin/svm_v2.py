@@ -24,18 +24,23 @@ class mySVM(BaseEstimator, ClassifierMixin):
     def get_dw(self, x, y, data_size):
         dw = np.zeros(self.w_.shape)
         scores = np.dot(x, self.w_)
+        
+        ans = -np.ones(scores.shape)
+        ans[np.arange(data_size), y] = 1
 
-        label_scores = scores[np.arange(data_size), y]
-        d = scores - label_scores[:, np.newaxis] + 1
-        d = np.where(d > 0, 1, d)
-        d[np.arange(data_size),y] = 0
+        scores *= ans
+        scores = np.where(scores < 1, -1., 0)
+        scores *= ans
 
-        dw = (1/x.shape[0]) * np.dot(x.T, d) + (1. / self.c) * self.w_
+        dw = np.dot(x.T, scores) / data_size
+
+        dw[1:] += (1. / self.c) * self.w_[1:]
 
         return dw
 
     def fit(self, x, y):
         rgen = np.random.RandomState(self.random_state)
+        x = np.append(np.ones((x.shape[0], 1)), x, axis=1)
 
         # Magic number means 10 classes(MNIST)
         self.label_number = 10
@@ -85,6 +90,7 @@ class mySVM(BaseEstimator, ClassifierMixin):
         return self
         
     def predict(self, x):
+        x = np.append(np.ones((x.shape[0], 1)), x, axis=1)
         return np.argmax(np.dot(x, self.w_), axis=1)
 
     def score(self, x, y):
