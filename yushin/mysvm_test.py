@@ -1,4 +1,4 @@
-from svm import mySVM
+from svm_v2 import mySVM
 import numpy as np
 from loader import load
 from sklearn import metrics
@@ -23,28 +23,29 @@ X, tx = X[:split], X[split:]
 Y = Y[shuffled_indices]
 Y, ty = Y[:split], Y[split:]
 
-
 # # Training / Testing
-# size = 60000
+# size = 20000
 
 # X, Y = load('training', data_size=size)
 # tx, ty = load('testing', data_size=10000)
 
 
 
-# PCA transformation
-pca = PCA(.95)
-pca.fit(X)
+# # PCA transformation
+# pca = PCA(.97)
+# pca.fit(X)
 
-X = pca.transform(X)
-tx = pca.transform(tx)
+# X = pca.transform(X)
+# tx = pca.transform(tx)
+
+
 
 X = scale(X)
 tx = scale(tx)
 
 
 
-model = mySVM(c=1000, eta=0.005, mu=0.999, v=0.99, max_iter=7000)
+model = mySVM(c=200.15, eta=0.001, mu=0.9999, v=0.9999, max_iter=17000)
 model.fit(X, Y)
 
 predicted = model.predict(tx)
@@ -68,7 +69,7 @@ evaluation(predicted, ty)
 # print(gs.best_params_)
 
 # c, eta, mu, v = gs.best_params_['c'], gs.best_params_['eta'], gs.best_params_['mu'], gs.best_params_['v']
-# model = mySVM(c=c, eta=eta, mu=mu, v=v, max_iter=10000)
+# model = mySVM(c=c, eta=eta, mu=mu, v=v, max_iter=7000)
 # model.fit(X, Y)
 # predicted = model.predict(tx)
 # evaluation(predicted, ty)

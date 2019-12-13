@@ -62,7 +62,6 @@ class mySVM(BaseEstimator, ClassifierMixin):
         n = np.zeros_like(self.w_)
         mu_pw = self.mu
         v_pw = self.v
-
         for epoch in range(n_epochs):
             random_indices = mySVM.shuffle(self.data_size)
 
@@ -74,18 +73,18 @@ class mySVM(BaseEstimator, ClassifierMixin):
 
                 dw = self.get_dw(batch_x, batch_y, batch_size)
 
-                # Naive SGD
-                self.w_ -= self.eta*dw
+                # # Naive SGD
+                # self.w_ -= self.eta*dw
 
-                # # NADAM
-                # m = self.mu*m + (1-self.mu)*dw
-                # n = self.v*n + (1-self.v)*np.power(dw, 2)
-                # m_hat = (self.mu*m/(1 - mu_pw*self.mu)) + ((1-self.mu)*dw/(1-mu_pw))
-                # n_hat = self.v*n / (1-v_pw)
-                # self.w_ -= self.eta * m_hat / np.sqrt(epsilon + n_hat)
+                # NADAM
+                m = self.mu*m + (1-self.mu)*dw
+                n = self.v*n + (1-self.v)*np.power(dw, 2)
+                m_hat = (self.mu*m/(1 - mu_pw*self.mu)) + ((1-self.mu)*dw/(1-mu_pw))
+                n_hat = self.v*n / (1-v_pw)
+                self.w_ -= self.eta * m_hat / np.sqrt(epsilon + n_hat)
 
-                # mu_pw *= self.mu
-                # v_pw *= self.v
+                mu_pw *= self.mu
+                v_pw *= self.v
 
         return self
         
