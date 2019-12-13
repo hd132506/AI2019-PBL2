@@ -12,6 +12,17 @@ size = 80000
 
 X, Y = load('all', data_size=size)
 
+desc = np.array(hog_descriptors(X))
+
+X = flatten(X)
+
+X = np.append(X, desc, axis=1)
+print(X.shape)
+
+
+
+
+
 shuffled_indices = np.arange(size)
 np.random.shuffle(shuffled_indices)
 

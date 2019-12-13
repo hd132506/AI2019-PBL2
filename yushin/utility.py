@@ -1,6 +1,10 @@
 from sklearn import metrics
 import numpy as np
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
+from skimage.feature import hog
+
+def flatten(images):
+    return images.reshape((-1, 28*28))
 
 def evaluation(prediction, goal):
     print("Classification report\n%s\n"
@@ -23,3 +27,16 @@ def binarization(dataset):
         threshold = np.mean(data)
         ret.append(np.where(data < threshold, 0, 255))
     return np.array(ret)
+
+def hog_descriptors(images):
+    new_desc = []
+
+    c = len(images)
+
+    for i in images:
+        new_desc.append(hog(i, orientations=8, pixels_per_cell=(4, 4),
+                cells_per_block=(1, 1), visualize=True, multichannel=False)[0])
+        if c % 1000 == 0:
+            print(c)
+        c -= 1
+    return new_desc
