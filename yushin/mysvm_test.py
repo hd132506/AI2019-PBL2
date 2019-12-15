@@ -12,35 +12,43 @@ size = 80000
 
 X, Y = load('all', data_size=size)
 
-desc = np.array(hog_descriptors(X))
-
-X = flatten(X)
-
-X = np.append(X, desc, axis=1)
-print(X.shape)
-
-
-
-
-
 shuffled_indices = np.arange(size)
 np.random.shuffle(shuffled_indices)
 
-split = 70000
+split = int(size*0.8)
 
 X = X[shuffled_indices]
 X, tx = X[:split], X[split:]
 
+desc_X = np.array(hog_descriptors(X))
+X = flatten(X)
+X = np.append(X, desc_X, axis=1)
+
+desc_tx = np.array(hog_descriptors(tx))
+tx = flatten(tx)
+tx = np.append(tx, desc_tx, axis=1)
+
 Y = Y[shuffled_indices]
 Y, ty = Y[:split], Y[split:]
 
+X = scale(X)
+tx = scale(tx)
+
+
+
 # # Training / Testing
-# size = 20000
+# size = 40000
 
 # X, Y = load('training', data_size=size)
 # tx, ty = load('testing', data_size=10000)
 
+# desc_X = np.array(hog_descriptors(X))
+# X = flatten(X)
+# X = np.append(scale(X), scale(desc_X), axis=1)
 
+# desc_tx = np.array(hog_descriptors(tx))
+# tx = flatten(tx)
+# tx = np.append(scale(tx), scale(desc_tx), axis=1)
 
 # # PCA transformation
 # pca = PCA(.97)
@@ -51,12 +59,9 @@ Y, ty = Y[:split], Y[split:]
 
 
 
-X = scale(X)
-tx = scale(tx)
 
 
-
-model = mySVM(c=200.15, eta=0.001, mu=0.9999, v=0.9999, max_iter=17000)
+model = mySVM(c=200.15, eta=0.001, mu=0.9999, v=0.9999, max_iter=57000)
 model.fit(X, Y)
 
 predicted = model.predict(tx)
