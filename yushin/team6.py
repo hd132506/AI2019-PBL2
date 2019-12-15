@@ -1,8 +1,15 @@
 import os
 import struct
 import numpy as np
-import sys
+import cupy as cp
 
+# Uncomment following line for some environment where cupy completely compatible with numpy
+# import cupy as np
+
+# Uncomment following line for some environment where cupy doesn't work
+# import numpy as cp
+
+import sys
 import random
 from sklearn.base import BaseEstimator, ClassifierMixin
 
@@ -25,17 +32,17 @@ class mySVM(BaseEstimator, ClassifierMixin):
         return shuffled_indices
 
     def get_dw(self, x, y, data_size):
-        dw = np.zeros(self.w_.shape)
-        scores = np.dot(x, self.w_)
+        dw = cp.zeros(self.w_.shape)
+        scores = cp.dot(x, self.w_)
         
-        ans = -np.ones(scores.shape)
-        ans[np.arange(data_size), y] = 1
+        ans = -cp.ones(scores.shape)
+        ans[cp.arange(data_size), y] = 1
 
         scores *= ans
-        scores = np.where(scores < 1, -1., 0)
+        scores = cp.where(scores < 1, -1., 0)
         scores *= ans
 
-        dw = np.dot(x.T, scores) / data_size
+        dw = cp.dot(x.T, scores) / data_size
 
         dw[1:] += (1. / self.c) * self.w_[1:]
 
